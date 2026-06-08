@@ -176,7 +176,9 @@ jobs:
           VERSION: ${{ needs.build.outputs.version }}
           COMMIT_SHA: ${{ github.sha }}
           RUN_NUMBER: ${{ github.run_number }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
+          BLOB_PREFIX="${RUN_NUMBER}-attempt${RUN_ATTEMPT}"
           cat > release-evidence.json << EOF
           {
             "runNumber": "${RUN_NUMBER}",
@@ -199,24 +201,26 @@ jobs:
           az storage blob upload \
             --account-name ${{ env.AUDIT_STORAGE }} \
             --container-name release-audit \
-            --name "${RUN_NUMBER}/release-evidence.json" \
+            --name "${BLOB_PREFIX}/release-evidence.json" \
             --file release-evidence.json \
             --auth-mode login \
-            --overwrite
+            --overwrite true
 
           az storage blob upload \
             --account-name ${{ env.AUDIT_STORAGE }} \
             --container-name release-audit \
-            --name "${RUN_NUMBER}/release-evidence.json.bundle" \
+            --name "${BLOB_PREFIX}/release-evidence.json.bundle" \
             --file release-evidence.json.bundle \
             --auth-mode login \
-            --overwrite
+            --overwrite true
 
       - name: Generate and sign SBOM
         env:
           SBOM_VERSION: ${{ needs.build.outputs.version }}
           RUN_NUMBER: ${{ github.run_number }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
+          BLOB_PREFIX="${RUN_NUMBER}-attempt${RUN_ATTEMPT}"
           dotnet tool install --global Microsoft.Sbom.DotNetTool 2>/dev/null || true
           sbom-tool generate \
             -b src/Bidirectional.Web \
@@ -236,15 +240,15 @@ jobs:
           az storage blob upload \
             --account-name ${{ env.AUDIT_STORAGE }} \
             --container-name sbom-archive \
-            --name "${RUN_NUMBER}/sbom.spdx.json" \
+            --name "${BLOB_PREFIX}/sbom.spdx.json" \
             --file sbom.spdx.json \
             --auth-mode login \
-            --overwrite
+            --overwrite true
 
           az storage blob upload \
             --account-name ${{ env.AUDIT_STORAGE }} \
             --container-name sbom-archive \
-            --name "${RUN_NUMBER}/sbom.spdx.json.bundle" \
+            --name "${BLOB_PREFIX}/sbom.spdx.json.bundle" \
             --file sbom.spdx.json.bundle \
             --auth-mode login \
-            --overwrite
+            --overwrite true
