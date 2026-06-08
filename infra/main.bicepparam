@@ -1,18 +1,15 @@
 using './main.bicep'
 
-// ── Required — fill these in before deploying ─────────────────────────────────
+// ── Deployment identity ───────────────────────────────────────────────────────
+param deploymentSpObjectId = 'e21d55bf-c19d-492d-8952-1ffd5cb73c02'
 
-// Object ID of sp-bidirectional-dev-deploy (from: az ad sp show --display-name sp-bidirectional-dev-deploy --query id -o tsv)
-param deploymentSpObjectId = 'REPLACE_WITH_SP_OBJECT_ID'
+// ── Alert notifications ───────────────────────────────────────────────────────
+param alertEmailAddress = 'raiabishkar0.5@gmail.com'
 
-// Your notification email for Monitor alert rules
-param alertEmailAddress = 'REPLACE_WITH_YOUR_EMAIL'
+// ── App Service managed identity (fill after Stage 8) ────────────────────────
+param appServiceManagedIdentityObjectId = '06f480c6-375d-47e9-94f1-0c5fcf13bb8d'
 
-// ── Optional — set after Stage 8 managed identity is enabled ─────────────────
-// Object ID from: App Service → Identity → System assigned → Object (principal) ID
-param appServiceManagedIdentityObjectId = ''
-
-// ── Defaults (change only if your naming differs) ─────────────────────────────
+// ── Azure account ─────────────────────────────────────────────────────────────
 param environment = 'dev'
 param location = 'australiaeast'
-param subscriptionId = '00000000-0000-0000-0000-000000000002'
+param subscriptionId = '156c186b-44ba-4fb4-98c1-4ff26e131d41'

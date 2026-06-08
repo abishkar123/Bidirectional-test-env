@@ -18,6 +18,7 @@ param auditStorageAccountName string = 'stbidirectionalaudit'
 var websiteContributorRoleId = 'de139f84-1756-47ae-9be6-808fbbe84772'
 var kvSecretsUserRoleId = '4633458b-17de-408a-b874-0445c86b69e6'
 var storageBlobDataReaderRoleId = '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+var storageBlobDataContributorRoleId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 
 // ── Stage 1.3: Website Contributor on the resource group ─────────────────────
 resource websiteContributorAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
@@ -39,6 +40,20 @@ resource kvSecretsUserAssignment 'Microsoft.Authorization/roleAssignments@2022-0
     principalId: appServiceManagedIdentityObjectId
     principalType: 'ServicePrincipal'
     description: 'App Service managed identity — Key Vault Secrets User for runtime secret access'
+  }
+}
+
+// ── CI/CD pipeline: Storage Blob Data Contributor on audit storage ────────────
+// The deployment SP uploads release evidence, SBOM, provenance, and scan results
+// to the private audit containers during each pipeline run.
+resource storageBlobDataContributorAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: auditStorage
+  name: guid(auditStorage.id, deploymentSpObjectId, storageBlobDataContributorRoleId)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleId)
+    principalId: deploymentSpObjectId
+    principalType: 'ServicePrincipal'
+    description: 'Deployment SP — Storage Blob Data Contributor on audit storage for pipeline evidence uploads'
   }
 }
 

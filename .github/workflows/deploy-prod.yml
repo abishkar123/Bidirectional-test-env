@@ -117,7 +117,8 @@ jobs:
             --container-name policy-evidence \
             --name "${RUN_NUMBER}/policy-state-${TIMESTAMP}.json" \
             --file "policy-state-${TIMESTAMP}.json" \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
 
   # ── 3. Deploy to Staging Slot ─────────────────────────────────────────────────
   deploy-staging:
@@ -266,7 +267,8 @@ jobs:
             --container-name release-audit \
             --name "${RUN_NUMBER}/release-evidence.json" \
             --file release-evidence.json \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
 
           # Upload the cosign bundle alongside the evidence
           az storage blob upload \
@@ -274,7 +276,8 @@ jobs:
             --container-name release-audit \
             --name "${RUN_NUMBER}/release-evidence.json.bundle" \
             --file release-evidence.json.bundle \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
 
       # ── SBOM generation (SPDX 2.2 via Microsoft SBOM Tool) ─────────────────
       - name: Generate SBOM
@@ -283,6 +286,7 @@ jobs:
           RUN_NUMBER: ${{ github.run_number }}
         run: |
           dotnet tool install --global Microsoft.Sbom.DotNetTool 2>/dev/null || true
+          mkdir -p sbom-output
           sbom-tool generate \
             -b src/Bidirectional.Web \
             -bc src/Bidirectional.Web \
@@ -290,7 +294,7 @@ jobs:
             -pv "${SBOM_VERSION}" \
             -ps Bidirectional \
             -nsb https://bidirectional.example.com/sbom \
-            -o sbom-output
+            -m sbom-output
 
           cp sbom-output/_manifest/spdx_2.2/manifest.spdx.json sbom.spdx.json
 
@@ -299,7 +303,8 @@ jobs:
             --container-name sbom-archive \
             --name "${RUN_NUMBER}/sbom.spdx.json" \
             --file sbom.spdx.json \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
 
       # ── Cosign sign the SBOM ────────────────────────────────────────────────
       - name: Sign SBOM with cosign
@@ -318,7 +323,8 @@ jobs:
             --container-name sbom-archive \
             --name "${RUN_NUMBER}/sbom.spdx.json.bundle" \
             --file sbom.spdx.json.bundle \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
 
       # ── SLSA provenance ─────────────────────────────────────────────────────
       - name: Generate SLSA provenance
@@ -383,14 +389,16 @@ jobs:
             --container-name provenance-archive \
             --name "${RUN_NUMBER}/provenance.json" \
             --file provenance.json \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
 
           az storage blob upload \
             --account-name ${{ env.AUDIT_STORAGE }} \
             --container-name provenance-archive \
             --name "${RUN_NUMBER}/provenance.json.bundle" \
             --file provenance.json.bundle \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
 
       # ── Upload all scan results ─────────────────────────────────────────────
       - name: Upload scan results summary
@@ -417,4 +425,5 @@ jobs:
             --container-name scan-results \
             --name "${RUN_NUMBER}/scan-summary.json" \
             --file scan-summary.json \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
