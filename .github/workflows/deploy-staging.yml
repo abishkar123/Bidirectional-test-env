@@ -201,14 +201,16 @@ jobs:
             --container-name release-audit \
             --name "${RUN_NUMBER}/release-evidence.json" \
             --file release-evidence.json \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
 
           az storage blob upload \
             --account-name ${{ env.AUDIT_STORAGE }} \
             --container-name release-audit \
             --name "${RUN_NUMBER}/release-evidence.json.bundle" \
             --file release-evidence.json.bundle \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
 
       - name: Generate and sign SBOM
         env:
@@ -236,11 +238,13 @@ jobs:
             --container-name sbom-archive \
             --name "${RUN_NUMBER}/sbom.spdx.json" \
             --file sbom.spdx.json \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
 
           az storage blob upload \
             --account-name ${{ env.AUDIT_STORAGE }} \
             --container-name sbom-archive \
             --name "${RUN_NUMBER}/sbom.spdx.json.bundle" \
             --file sbom.spdx.json.bundle \
-            --auth-mode login
+            --auth-mode login \
+            --overwrite
