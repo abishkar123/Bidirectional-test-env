@@ -1,0 +1,15 @@
+html { height: 100%; }
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+.container-fluid { flex: 1; }
+
+.navbar-brand { letter-spacing: .5px; }
+
+.card { border-radius: .75rem; }
+.card-header { border-radius: .75rem .75rem 0 0 !important; }
+
+table code { font-size: .8rem; }

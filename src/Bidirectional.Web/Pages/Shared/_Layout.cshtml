@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — Bidirectional Platform</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark border-bottom border-secondary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-semibold" asp-page="/Index">
+                <i class="bi bi-arrow-left-right me-2"></i>Bidirectional
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/Index">
+                            <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/Releases/Index">
+                            <i class="bi bi-rocket me-1"></i>Releases
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/Policy/Index">
+                            <i class="bi bi-shield-check me-1"></i>Policy
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/Scans/Index">
+                            <i class="bi bi-bug me-1"></i>Scans
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/Sbom/Index">
+                            <i class="bi bi-file-earmark-code me-1"></i>SBOM
+                        </a>
+                    </li>
+                </ul>
+                <span class="navbar-text text-secondary small">
+                    <i class="bi bi-circle-fill text-success me-1" style="font-size:.6rem"></i>
+                    @System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4 px-4">
+        @RenderBody()
+    </div>
+
+    <footer class="border-top bg-dark text-secondary small py-2 px-4 mt-auto">
+        &copy; @DateTime.UtcNow.Year Bidirectional &mdash; Regulated Platform Dashboard
+    </footer>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

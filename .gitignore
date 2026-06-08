@@ -1,0 +1,24 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+_ReSharper*/
+*.DotSettings.user
+
+## Secrets — never commit
+appsettings.Local.json
+appsettings.*.Local.json
+secrets.json
+
+## Build artifacts
+publish/
+*.nupkg
+*.snupkg
+TestResults/
+coverage/
+
+## OS
+.DS_Store
+Thumbs.db

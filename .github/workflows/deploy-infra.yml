@@ -1,0 +1,120 @@
+name: Deploy Infrastructure (Bicep)
+
+on:
+  push:
+    branches: [main, development]
+    paths:
+      - "infra/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "staging"
+        type: choice
+        options: [staging, production]
+
+env:
+  RESOURCE_GROUP: rg-bidirectional-dev-app
+  LOCATION: australiaeast
+  SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+jobs:
+  # ── Resolve which environment this run targets ────────────────────────────────
+  resolve-env:
+    name: Resolve Environment
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.resolve.outputs.environment }}
+    steps:
+      - name: Resolve from branch or manual input
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_ENV: ${{ github.event.inputs.environment }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            # Constrained to choice: staging | production — validate defensively
+            case "$INPUT_ENV" in
+              staging|production) echo "environment=$INPUT_ENV" >> "$GITHUB_OUTPUT" ;;
+              *) echo "::error::Invalid environment input: $INPUT_ENV"; exit 1 ;;
+            esac
+          elif [ "$REF_NAME" = "main" ]; then
+            echo "environment=production" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ── Bicep what-if (preview changes before applying) ──────────────────────────
+  whatif:
+    name: Bicep What-If Preview
+    runs-on: ubuntu-latest
+    needs: resolve-env
+    environment: ${{ needs.resolve-env.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Policy initiative — what-if (subscription scope)
+        run: |
+          az deployment sub what-if \
+            --name "infra-policy-whatif-${{ github.run_number }}" \
+            --location ${{ env.LOCATION }} \
+            --template-file infra/policies/initiative.bicep \
+            --parameters appResourceGroupName=${{ env.RESOURCE_GROUP }}
+
+      - name: Main stack — what-if (resource group scope)
+        run: |
+          az deployment group what-if \
+            --name "infra-main-whatif-${{ github.run_number }}" \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --template-file infra/main.bicep \
+            --parameters infra/main.bicepparam
+
+  # ── Deploy Bicep (only on push, not PRs) ─────────────────────────────────────
+  deploy-infra:
+    name: Deploy Bicep
+    runs-on: ubuntu-latest
+    needs: [resolve-env, whatif]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    environment: ${{ needs.resolve-env.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy policy initiative (subscription scope)
+        run: |
+          az deployment sub create \
+            --name "infra-policy-${{ github.run_number }}" \
+            --location ${{ env.LOCATION }} \
+            --template-file infra/policies/initiative.bicep \
+            --parameters appResourceGroupName=${{ env.RESOURCE_GROUP }}
+
+      - name: Deploy main stack (resource group scope)
+        run: |
+          az deployment group create \
+            --name "infra-main-${{ github.run_number }}" \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --template-file infra/main.bicep \
+            --parameters infra/main.bicepparam \
+            --mode Incremental
+
+      - name: Show deployment outputs
+        run: |
+          az deployment group show \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name "infra-main-${{ github.run_number }}" \
+            --query properties.outputs
