@@ -290,7 +290,7 @@ jobs:
             -pv "${SBOM_VERSION}" \
             -ps Bidirectional \
             -nsb https://bidirectional.example.com/sbom \
-            -o sbom-output
+            -m sbom-output
 
           cp sbom-output/_manifest/spdx_2.2/manifest.spdx.json sbom.spdx.json
 
