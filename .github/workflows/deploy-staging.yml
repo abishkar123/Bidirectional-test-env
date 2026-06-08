@@ -222,6 +222,7 @@ jobs:
         run: |
           BLOB_PREFIX="${RUN_NUMBER}-attempt${RUN_ATTEMPT}"
           dotnet tool install --global Microsoft.Sbom.DotNetTool 2>/dev/null || true
+          mkdir -p sbom-output
           sbom-tool generate \
             -b src/Bidirectional.Web \
             -bc src/Bidirectional.Web \
