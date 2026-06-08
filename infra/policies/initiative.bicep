@@ -2,9 +2,6 @@
 // Deployed at subscription scope; assigned to rg-bidirectional-dev-app with Audit effect.
 targetScope = 'subscription'
 
-@description('Resource group to assign the initiative to')
-param appResourceGroupName string = 'rg-bidirectional-dev-app'
-
 @description('Policy enforcement mode')
 @allowed(['Default', 'DoNotEnforce'])
 param enforcementMode string = 'Default'
@@ -72,17 +69,15 @@ resource initiativeDefinition 'Microsoft.Authorization/policySetDefinitions@2023
   }
 }
 
-// ── Assignment to the app resource group (Audit effect for dev) ──────────────
+// ── Assignment at subscription scope (Audit effect — reports, does not block) ──
+// Assigning at subscription scope so all resource groups including
+// rg-bidirectional-dev-app are covered. Effect is Audit for dev.
 resource initiativeAssignment 'Microsoft.Authorization/policyAssignments@2023-04-01' = {
   name: 'bidirectional-dev-baseline'
   properties: {
     displayName: 'bidirectional-dev-baseline'
-    description: 'Assigns the regulated platform baseline initiative to the dev app resource group'
+    description: 'Regulated platform baseline controls — APRA CPS 234, ASIC RG271'
     policyDefinitionId: initiativeDefinition.id
     enforcementMode: enforcementMode
-    // Scope to resource group (subscription scope deployment, but assignment at RG level)
-    // The scope here pins to the RG using the subscription's resource group reference.
   }
-  // Assignment must scope to the RG — set via the resource's scope property
-  scope: resourceGroup(appResourceGroupName)
 }

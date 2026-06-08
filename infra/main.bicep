@@ -26,12 +26,20 @@ var appiName = 'appi-${prefix}-${environment}'
 var auditStorageName = 'st${prefix}audit'
 var actionGroupName = 'ag-${prefix}-${environment}-oncall'
 
-// ── Stage 1: RBAC — Website Contributor only ─────────────────────────────────
-module rbac 'modules/rbac.bicep' = {
-  name: 'rbac'
+// ── Storage Account (audit blobs, log export destination) ───────────────────
+module storage 'modules/storage.bicep' = {
+  name: 'storage'
   params: {
-    deploymentSpObjectId: deploymentSpObjectId
-    appServiceManagedIdentityObjectId: appServiceManagedIdentityObjectId
+    location: location
+    auditStorageName: auditStorageName
+  }
+}
+
+// ── Key Vault ─────────────────────────────────────────────────────────────────
+module keyVault 'modules/key-vault.bicep' = {
+  name: 'keyVault'
+  params: {
+    location: location
     kvName: kvName
   }
 }
@@ -43,14 +51,37 @@ module observability 'modules/observability.bicep' = {
     location: location
     lawName: lawName
     appiName: appiName
+  }
+}
+
+// ── App Service Plan + App Service ────────────────────────────────────────────
+module appService 'modules/app-service.bicep' = {
+  name: 'appService'
+  dependsOn: [observability, keyVault]
+  params: {
+    location: location
     appName: appName
+    appiName: appiName
+    kvName: kvName
+    environment: environment
+  }
+}
+
+// ── Stage 1: RBAC ────────────────────────────────────────────────────────────
+module rbac 'modules/rbac.bicep' = {
+  name: 'rbac'
+  dependsOn: [appService]
+  params: {
+    deploymentSpObjectId: deploymentSpObjectId
+    appServiceManagedIdentityObjectId: appServiceManagedIdentityObjectId
+    kvName: kvName
   }
 }
 
 // ── Stage 4: Monitor Alert Rules ─────────────────────────────────────────────
 module alerts 'modules/alerts.bicep' = {
   name: 'alerts'
-  dependsOn: [observability]
+  dependsOn: [observability, appService]
   params: {
     location: location
     appiName: appiName
@@ -63,7 +94,7 @@ module alerts 'modules/alerts.bicep' = {
 // ── Stage 5: Log Analytics → Audit Storage export ────────────────────────────
 module logExport 'modules/log-export.bicep' = {
   name: 'logExport'
-  dependsOn: [observability]
+  dependsOn: [observability, storage]
   params: {
     lawName: lawName
     auditStorageName: auditStorageName
@@ -74,6 +105,7 @@ module logExport 'modules/log-export.bicep' = {
 // ── Stage 6: Audit Storage containers ────────────────────────────────────────
 module auditContainers 'modules/audit-storage.bicep' = {
   name: 'auditContainers'
+  dependsOn: [storage]
   params: {
     auditStorageName: auditStorageName
   }
@@ -82,8 +114,14 @@ module auditContainers 'modules/audit-storage.bicep' = {
 // ── Stage 7: Deployment slot ──────────────────────────────────────────────────
 module slot 'modules/deployment-slot.bicep' = {
   name: 'deploymentSlot'
+  dependsOn: [appService]
   params: {
     appName: appName
     productionSlotEnvironment: 'Development'
   }
 }
+
+output appServiceName string = appName
+output appServiceUrl string = 'https://${appName}.azurewebsites.net'
+output keyVaultName string = kvName
+output auditStorageName string = auditStorageName
