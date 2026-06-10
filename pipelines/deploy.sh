@@ -7,7 +7,7 @@
 set -euo pipefail
 
 RESOURCE_GROUP="rg-bidirectional-dev-app"
-SUBSCRIPTION="00000000-0000-0000-0000-000000000002"
+SUBSCRIPTION="156c186b-44ba-4fb4-98c1-4ff26e131d41"
 LOCATION="australiaeast"
 
 az account set --subscription "$SUBSCRIPTION"
@@ -17,7 +17,6 @@ az deployment sub create \
   --name "bidirectional-policy-$(date +%Y%m%d%H%M%S)" \
   --location "$LOCATION" \
   --template-file infra/policies/initiative.bicep \
-  --parameters appResourceGroupName="$RESOURCE_GROUP" \
   --confirm-with-what-if
 
 echo ""
