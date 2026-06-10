@@ -1,13 +1,13 @@
 using './main.bicep'
 
 // ── Deployment identity ───────────────────────────────────────────────────────
-param deploymentSpObjectId = 'e21d55bf-c19d-492d-8952-1ffd5cb73c02'
+param deploymentSpObjectId = 'e347e057-e600-4544-9cc8-3cac5b365d3f'
 
 // ── Alert notifications ───────────────────────────────────────────────────────
 param alertEmailAddress = 'raiabishkar0.5@gmail.com'
 
 // ── App Service managed identity (fill after Stage 8) ────────────────────────
-param appServiceManagedIdentityObjectId = '06f480c6-375d-47e9-94f1-0c5fcf13bb8d'
+param appServiceManagedIdentityObjectId = '7c557a45-2818-415e-9cd2-1bf41853264b'
 
 // ── Azure account ─────────────────────────────────────────────────────────────
 param environment = 'dev'
