@@ -22,3 +22,12 @@ coverage/
 ## OS
 .DS_Store
 Thumbs.db
+
+## Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+override.tf
+override.tf.json
