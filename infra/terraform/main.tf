@@ -16,7 +16,6 @@ terraform {
 
 provider "azurerm" {
   features {}
-  use_oidc        = true
   subscription_id = var.subscription_id
 }
 
@@ -101,10 +100,9 @@ module "audit_containers" {
 }
 
 module "deployment_slot" {
-  source          = "./modules/deployment-slot"
-  app_service_id  = module.app_service.app_service_id
-  service_plan_id = module.app_service.service_plan_id
-  depends_on      = [module.app_service]
+  source         = "./modules/deployment-slot"
+  app_service_id = module.app_service.app_service_id
+  depends_on     = [module.app_service]
 }
 
 module "policy" {
