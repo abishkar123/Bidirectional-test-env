@@ -1,0 +1,24 @@
+# Copy this file to terraform.tfvars and fill in your environment's values.
+#
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# terraform.tfvars is gitignored — never commit real IDs. In CI these values
+# are injected via TF_VAR_* environment variables sourced from GitHub secrets
+# (see .github/workflows/deploy-infra.yml), so no tfvars file is needed there.
+
+environment              = "dev"
+location                 = "australiaeast"
+resource_group_name      = "rg-bidirectional-dev-app"
+
+# Azure subscription to deploy into.
+subscription_id          = "00000000-0000-0000-0000-000000000000"
+
+# Object (principal) ID of the deployment service principal.
+deployment_sp_object_id  = "00000000-0000-0000-0000-000000000000"
+
+# Object (principal) ID of the App Service managed identity.
+# Leave as "" until the identity exists, then re-apply.
+app_service_mi_object_id = "00000000-0000-0000-0000-000000000000"
+
+# Email address that receives Azure Monitor alert notifications.
+alert_email_address      = "oncall@example.com"

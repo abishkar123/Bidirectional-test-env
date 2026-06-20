@@ -1,7 +1,0 @@
-environment              = "dev"
-location                 = "australiaeast"
-subscription_id          = "156c186b-44ba-4fb4-98c1-4ff26e131d41"
-resource_group_name      = "rg-bidirectional-dev-app"
-deployment_sp_object_id  = "e21d55bf-c19d-492d-8952-1ffd5cb73c02"
-app_service_mi_object_id = "06f480c6-375d-47e9-94f1-0c5fcf13bb8d"
-alert_email_address      = "raiabishkar0.5@gmail.com"

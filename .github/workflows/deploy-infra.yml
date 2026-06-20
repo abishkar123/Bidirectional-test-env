@@ -16,10 +16,16 @@ on:
 
 env:
   TF_WORKING_DIR: infra/terraform
+  # Provider / backend authentication (OIDC)
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   ARM_USE_OIDC: "true"
+  # Terraform input variables — injected from secrets so no tfvars is committed.
+  TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  TF_VAR_deployment_sp_object_id: ${{ secrets.DEPLOYMENT_SP_OBJECT_ID }}
+  TF_VAR_app_service_mi_object_id: ${{ secrets.APP_SERVICE_MI_OBJECT_ID }}
+  TF_VAR_alert_email_address: ${{ secrets.ALERT_EMAIL_ADDRESS }}
 
 permissions:
   id-token: write

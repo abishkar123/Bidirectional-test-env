@@ -31,3 +31,8 @@ Thumbs.db
 tfplan
 override.tf
 override.tf.json
+
+## Terraform variable files — contain environment-specific IDs, never commit.
+## Use terraform.tfvars.example as the committed template.
+terraform.tfvars
+*.auto.tfvars

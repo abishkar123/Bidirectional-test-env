@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
 # Bidirectional regulated platform — full infrastructure deployment via Terraform
 #
-# One-time prerequisite (run once before first terraform init):
-#   az storage container create \
-#     --name tfstate \
-#     --account-name stbidirectionalaudit \
-#     --auth-mode login
+# Prerequisites:
+#   1. az login                              (Azure CLI auth for local runs)
+#   2. cp infra/terraform/terraform.tfvars.example \
+#         infra/terraform/terraform.tfvars   (then fill in your IDs — gitignored)
+#   3. One-time, before first terraform init, create the state container:
+#        az storage container create \
+#          --name tfstate \
+#          --account-name stbidirectionalaudit \
+#          --auth-mode login
+#
+# The azurerm provider targets the subscription via var.subscription_id from
+# terraform.tfvars, so no subscription ID is hardcoded here.
 set -euo pipefail
 
-SUBSCRIPTION="156c186b-44ba-4fb4-98c1-4ff26e131d41"
 TF_DIR="infra/terraform"
-
-az account set --subscription "$SUBSCRIPTION"
 
 echo "=== Terraform Init ==="
 terraform -chdir="$TF_DIR" init
