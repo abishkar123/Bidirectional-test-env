@@ -7,8 +7,7 @@ variable "deployment_sp_object_id" {
 }
 
 variable "app_service_mi_object_id" {
-  type    = string
-  default = ""
+  type = string
 }
 
 variable "audit_storage_id" {

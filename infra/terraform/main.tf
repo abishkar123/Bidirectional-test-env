@@ -8,7 +8,7 @@ terraform {
   }
   backend "azurerm" {
     resource_group_name  = "rg-bidirectional-dev-app"
-    storage_account_name = "stbidirectionalaudit"
+    storage_account_name = "stbidirectionaltfstate"
     container_name       = "tfstate"
     key                  = "bidirectional.terraform.tfstate"
   }
@@ -70,7 +70,7 @@ module "rbac" {
   source                   = "./modules/rbac"
   resource_group_id        = data.azurerm_resource_group.main.id
   deployment_sp_object_id  = var.deployment_sp_object_id
-  app_service_mi_object_id = var.app_service_mi_object_id
+  app_service_mi_object_id = module.app_service.principal_id
   audit_storage_id         = module.storage.storage_id
   depends_on               = [module.app_service]
 }

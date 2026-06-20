@@ -16,7 +16,6 @@ resource "azurerm_role_assignment" "website_contributor" {
 }
 
 resource "azurerm_role_assignment" "kv_secrets_user" {
-  count              = var.app_service_mi_object_id != "" ? 1 : 0
   scope              = var.resource_group_id
   role_definition_id = "${local.sub_prefix}/${local.kv_secrets_user_role_id}"
   principal_id       = var.app_service_mi_object_id
@@ -31,7 +30,6 @@ resource "azurerm_role_assignment" "storage_blob_data_contributor" {
 }
 
 resource "azurerm_role_assignment" "storage_blob_data_reader" {
-  count              = var.app_service_mi_object_id != "" ? 1 : 0
   scope              = var.audit_storage_id
   role_definition_id = "${local.sub_prefix}/${local.storage_blob_data_reader_role_id}"
   principal_id       = var.app_service_mi_object_id

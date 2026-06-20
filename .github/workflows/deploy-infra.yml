@@ -24,7 +24,6 @@ env:
   # Terraform input variables — injected from secrets so no tfvars is committed.
   TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   TF_VAR_deployment_sp_object_id: ${{ secrets.DEPLOYMENT_SP_OBJECT_ID }}
-  TF_VAR_app_service_mi_object_id: ${{ secrets.APP_SERVICE_MI_OBJECT_ID }}
   TF_VAR_alert_email_address: ${{ secrets.ALERT_EMAIL_ADDRESS }}
 
 permissions:
@@ -57,11 +56,12 @@ jobs:
             echo "environment=staging" >> "$GITHUB_OUTPUT"
           fi
 
-  # ── Terraform plan (preview changes before applying) ─────────────────────────
-  terraform-plan:
-    name: Terraform Plan
+  # ── Terraform plan + apply in one protected job (keeps tfplan off artifacts) ──
+  terraform-deploy:
+    name: Terraform Deploy
     runs-on: ubuntu-latest
     needs: resolve-env
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     environment: ${{ needs.resolve-env.outputs.environment }}
     steps:
       - uses: actions/checkout@v4
@@ -76,35 +76,6 @@ jobs:
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform plan -out=tfplan
-
-      - name: Upload plan artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan
-          path: ${{ env.TF_WORKING_DIR }}/tfplan
-
-  # ── Terraform apply (only on push or workflow_dispatch) ──────────────────────
-  terraform-apply:
-    name: Terraform Apply
-    runs-on: ubuntu-latest
-    needs: [resolve-env, terraform-plan]
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    environment: ${{ needs.resolve-env.outputs.environment }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform Init
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init
-
-      - name: Download plan artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-          path: ${{ env.TF_WORKING_DIR }}
 
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORKING_DIR }}

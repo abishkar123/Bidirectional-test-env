@@ -26,12 +26,6 @@ variable "deployment_sp_object_id" {
   type        = string
 }
 
-variable "app_service_mi_object_id" {
-  description = "Object ID of the App Service managed identity (set after identity is enabled)"
-  type        = string
-  default     = ""
-}
-
 variable "alert_email_address" {
   description = "Alert notification email address"
   type        = string
