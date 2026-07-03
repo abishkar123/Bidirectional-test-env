@@ -22,3 +22,17 @@ coverage/
 ## OS
 .DS_Store
 Thumbs.db
+
+## Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+override.tf
+override.tf.json
+
+## Terraform variable files — contain environment-specific IDs, never commit.
+## Use terraform.tfvars.example as the committed template.
+terraform.tfvars
+*.auto.tfvars
