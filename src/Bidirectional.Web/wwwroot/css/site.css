@@ -1,15 +1,152 @@
-html { height: 100%; }
-body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: #f8f9fa;
+:root {
+  --bd-primary:        #2563eb;
+  --bd-primary-light:  #eff6ff;
+  --bd-border:         #e5e7eb;
+  --bd-bg:             #f3f4f6;
+  --bd-bg-card:        #ffffff;
+  --bd-text:           #111827;
+  --bd-text-muted:     #6b7280;
+  --bd-shadow:         0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --bd-radius:         .75rem;
+  --bd-sidebar-w:      220px;
 }
-.container-fluid { flex: 1; }
 
-.navbar-brand { letter-spacing: .5px; }
+/* ── Base ───────────────────────────────────────────────────────────────── */
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bd-bg);
+  font-family: system-ui,-apple-system,sans-serif;
+  color: var(--bd-text);
+}
 
-.card { border-radius: .75rem; }
-.card-header { border-radius: .75rem .75rem 0 0 !important; }
+/* ── App shell ──────────────────────────────────────────────────────────── */
+.app-shell { display: flex; min-height: 100vh; }
 
-table code { font-size: .8rem; }
+/* ── Sidebar ────────────────────────────────────────────────────────────── */
+.sidebar {
+  width: var(--bd-sidebar-w);
+  flex-shrink: 0;
+  background: var(--bd-bg-card);
+  border-right: 1px solid var(--bd-border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: 1.125rem 1rem;
+  font-weight: 700;
+  font-size: .9rem;
+  color: var(--bd-text);
+  letter-spacing: -.01em;
+  border-bottom: 1px solid var(--bd-border);
+  text-decoration: none;
+}
+.sidebar-brand:hover { color: var(--bd-text); }
+.sidebar-brand i { font-size: 1rem; color: var(--bd-primary); }
+
+.sidebar-nav {
+  flex: 1;
+  padding: .625rem .5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  padding: .475rem .75rem;
+  border-radius: .5rem;
+  color: var(--bd-text-muted);
+  text-decoration: none;
+  font-size: .85rem;
+  font-weight: 500;
+  transition: background .12s, color .12s;
+}
+.sidebar-nav-link i { font-size: .9rem; flex-shrink: 0; }
+.sidebar-nav-link:hover {
+  background: var(--bd-primary-light);
+  color: var(--bd-primary);
+}
+.sidebar-nav-link.active {
+  background: var(--bd-primary-light);
+  color: var(--bd-primary);
+  font-weight: 600;
+}
+
+.sidebar-footer {
+  padding: .875rem 1rem;
+  border-top: 1px solid var(--bd-border);
+  font-size: .75rem;
+  color: var(--bd-text-muted);
+}
+
+/* ── Main ───────────────────────────────────────────────────────────────── */
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.page-body {
+  flex: 1;
+  padding: 1.75rem 2rem;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+.app-footer {
+  padding: .625rem 2rem;
+  font-size: .78rem;
+  color: var(--bd-text-muted);
+  border-top: 1px solid var(--bd-border);
+  background: var(--bd-bg-card);
+}
+
+/* ── Cards ──────────────────────────────────────────────────────────────── */
+.card {
+  border: 1px solid var(--bd-border) !important;
+  border-radius: var(--bd-radius) !important;
+  box-shadow: var(--bd-shadow) !important;
+}
+.card-header {
+  background: var(--bd-bg-card) !important;
+  border-bottom: 1px solid var(--bd-border) !important;
+  padding: .75rem 1rem;
+  font-size: .85rem;
+}
+
+/* ── Tables ─────────────────────────────────────────────────────────────── */
+.table { font-size: .85rem; }
+.table thead th {
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--bd-text-muted);
+  border-bottom: 1px solid var(--bd-border);
+  padding: .6rem 1rem;
+}
+.table tbody td { padding: .65rem 1rem; vertical-align: middle; }
+table code { font-size: .78rem; }
+
+/* ── Page header ────────────────────────────────────────────────────────── */
+.page-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--bd-text);
+}
+
+/* ── Mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .sidebar { display: none; }
+  .page-body { padding: 1rem; }
+}
