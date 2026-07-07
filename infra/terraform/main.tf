@@ -66,13 +66,23 @@ module "app_service" {
   depends_on             = [module.observability, module.key_vault]
 }
 
+module "deployment_slot" {
+  source                 = "./modules/deployment-slot"
+  app_service_id         = module.app_service.app_service_id
+  appi_connection_string = module.observability.appi_connection_string
+  kv_name                = local.kv_name
+  audit_storage_name     = local.audit_storage_name
+  depends_on             = [module.app_service, module.observability]
+}
+
 module "rbac" {
-  source                   = "./modules/rbac"
-  resource_group_id        = data.azurerm_resource_group.main.id
-  deployment_sp_object_id  = var.deployment_sp_object_id
-  app_service_mi_object_id = module.app_service.principal_id
-  audit_storage_id         = module.storage.storage_id
-  depends_on               = [module.app_service]
+  source                    = "./modules/rbac"
+  resource_group_id         = data.azurerm_resource_group.main.id
+  deployment_sp_object_id   = var.deployment_sp_object_id
+  app_service_mi_object_id  = module.app_service.principal_id
+  staging_slot_mi_object_id = module.deployment_slot.principal_id
+  audit_storage_id          = module.storage.storage_id
+  depends_on                = [module.app_service, module.deployment_slot]
 }
 
 module "alerts" {
@@ -97,12 +107,6 @@ module "audit_containers" {
   source             = "./modules/audit-storage"
   storage_account_id = module.storage.storage_id
   depends_on         = [module.storage]
-}
-
-module "deployment_slot" {
-  source         = "./modules/deployment-slot"
-  app_service_id = module.app_service.app_service_id
-  depends_on     = [module.app_service]
 }
 
 module "policy" {

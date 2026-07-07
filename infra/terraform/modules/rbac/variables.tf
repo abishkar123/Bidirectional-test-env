@@ -13,3 +13,7 @@ variable "app_service_mi_object_id" {
 variable "audit_storage_id" {
   type = string
 }
+
+variable "staging_slot_mi_object_id" {
+  type = string
+}
