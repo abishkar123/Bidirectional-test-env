@@ -40,11 +40,3 @@ terraform.tfvars
 ## Per-tenant backend configs — contain subscription/storage account names.
 ## Use backend-configs/example.conf.example as the committed template.
 backend-configs/*.conf
-
-## Per-tenant backend configs (nested paths)
-**/backend-configs/*.conf
-
-## Terraform extras
-*.tfvars.json
-crash.log
-crash.*.log
