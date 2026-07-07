@@ -1,0 +1,18 @@
+# Per-tenant Terraform backend config.
+#
+# Each tenant runs in its own Azure subscription and has its own state
+# storage account (created once per tenant, before the first `terraform init`
+# — see infra/terraform/README or the runbook for the exact `az` commands).
+#
+# Usage:
+#   cp backend-configs/example.conf.example backend-configs/<tenant>.conf
+#   terraform init -backend-config=backend-configs/<tenant>.conf
+#
+# backend-configs/*.conf is gitignored (never commit real subscription/account
+# names here if they're considered sensitive for your org).
+
+subscription_id      = "00000000-0000-0000-0000-000000000000"
+resource_group_name  = "rg-bidirectional-dev-app"
+storage_account_name = "stbidirectionaltfstate"
+container_name       = "tfstate"
+key                  = "bidirectional.terraform.tfstate"
