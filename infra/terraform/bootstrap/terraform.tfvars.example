@@ -1,0 +1,10 @@
+# Copy this file to terraform.tfvars and fill in your tenant's values.
+#
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# Run this once per tenant, in that tenant's own subscription.
+
+tenant_name         = "bidirectional"
+subscription_id     = "00000000-0000-0000-0000-000000000000"
+resource_group_name = "rg-bidirectional-dev-app"
+github_repo         = "abishkar123/Bidirectional-test-env"

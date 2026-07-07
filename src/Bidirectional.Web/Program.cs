@@ -28,7 +28,7 @@ if (!string.IsNullOrEmpty(kvName))
     hc.AddAzureKeyVault(
         new Uri($"https://{kvName}.vault.azure.net/"),
         new DefaultAzureCredential(),
-        _ => { },
+        options => options.AddSecret("NEXT-PUBLIC-FIREBASE-AUTH-DOMAIN"),
         name: "keyvault",
         tags: ["ready"]);
 }

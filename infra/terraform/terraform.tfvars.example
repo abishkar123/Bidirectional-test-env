@@ -1,24 +1,31 @@
-# Copy this file to terraform.tfvars and fill in your environment's values.
+# Copy this file to terraform.tfvars and fill in your tenant's values.
 #
 #   cp terraform.tfvars.example terraform.tfvars
 #
 # terraform.tfvars is gitignored — never commit real IDs. In CI these values
 # are injected via TF_VAR_* environment variables sourced from GitHub secrets
 # (see .github/workflows/deploy-infra.yml), so no tfvars file is needed there.
+#
+# Each tenant has its own Azure subscription and runs this config
+# independently, pointed at its own backend-configs/<tenant>.conf
+# (see backend-configs/example.conf.example).
+
+# Short tenant identifier, used as the naming prefix for every resource
+# (e.g. "bidirectional" -> app-bidirectional-dev-api, kv-bidirectional-dev, ...)
+tenant_name              = "bidirectional"
 
 environment              = "dev"
 location                 = "australiaeast"
+
+# Resource group must already exist in this tenant's subscription.
 resource_group_name      = "rg-bidirectional-dev-app"
 
-# Azure subscription to deploy into.
+# Azure subscription to deploy into (this tenant's subscription).
 subscription_id          = "00000000-0000-0000-0000-000000000000"
 
-# Object (principal) ID of the deployment service principal.
+# Object (principal) ID of the deployment service principal, from
+# infra/terraform/bootstrap's output (deployment_sp_object_id).
 deployment_sp_object_id  = "00000000-0000-0000-0000-000000000000"
-
-# Object (principal) ID of the App Service managed identity.
-# Leave as "" until the identity exists, then re-apply.
-app_service_mi_object_id = "00000000-0000-0000-0000-000000000000"
 
 # Email address that receives Azure Monitor alert notifications.
 alert_email_address      = "oncall@example.com"

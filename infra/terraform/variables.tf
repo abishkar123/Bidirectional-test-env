@@ -1,3 +1,8 @@
+variable "tenant_name" {
+  description = "Short tenant identifier used as a naming prefix for all resources (e.g. \"bidirectional\"). Each tenant has its own Azure subscription and its own tfvars/backend config."
+  type        = string
+}
+
 variable "environment" {
   description = "Environment name (dev, staging, prod)"
   type        = string
@@ -11,18 +16,17 @@ variable "location" {
 }
 
 variable "subscription_id" {
-  description = "Subscription ID"
+  description = "Subscription ID for this tenant"
   type        = string
 }
 
 variable "resource_group_name" {
-  description = "Name of the resource group to deploy into"
+  description = "Name of the resource group to deploy into (must exist already, per tenant)"
   type        = string
-  default     = "rg-bidirectional-dev-app"
 }
 
 variable "deployment_sp_object_id" {
-  description = "Object ID of the deployment service principal sp-bidirectional-dev-deploy"
+  description = "Object ID of this tenant's deployment service principal (from infra/terraform/bootstrap)"
   type        = string
 }
 
