@@ -25,17 +25,3 @@ resource "azurerm_role_assignment" "storage_blob_data_reader" {
   principal_id         = var.app_service_mi_object_id
   principal_type       = "ServicePrincipal"
 }
-
-resource "azurerm_role_assignment" "staging_slot_kv_secrets_user" {
-  scope                = var.resource_group_id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = var.staging_slot_mi_object_id
-  principal_type       = "ServicePrincipal"
-}
-
-resource "azurerm_role_assignment" "staging_slot_storage_blob_data_reader" {
-  scope                = var.audit_storage_id
-  role_definition_name = "Storage Blob Data Reader"
-  principal_id         = var.staging_slot_mi_object_id
-  principal_type       = "ServicePrincipal"
-}
