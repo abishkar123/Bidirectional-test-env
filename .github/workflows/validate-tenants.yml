@@ -1,0 +1,20 @@
+name: Validate Tenant Manifests
+
+on:
+  pull_request:
+    paths:
+      - "tenants/**"
+  push:
+    branches: [main, development]
+    paths:
+      - "tenants/**"
+
+jobs:
+  validate:
+    name: Validate manifests against schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run schema validation
+        run: ./tenants/validate.sh

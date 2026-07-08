@@ -1,0 +1,14 @@
+{
+  "tenantId": "bidirectional",
+  "displayName": "Bidirectional",
+  "azureSubscriptionId": "00000000-0000-0000-0000-000000000000",
+  "isolationModel": "dedicated-subscription",
+  "regions": ["australiaeast"],
+  "dataResidency": "AU",
+  "keyVaultName": "kv-bidirectional-prod",
+  "auditStorageAccount": "stbidirectionalaudit",
+  "regulatoryClassification": ["APRA-CPS234", "AUSTRAC"],
+  "owner": "abishkar123",
+  "onboardedDate": "2026-01-01",
+  "retirementPolicy": "90-day soft-decommission, then subscription cancellation"
+}
