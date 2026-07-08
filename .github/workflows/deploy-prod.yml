@@ -204,6 +204,66 @@ jobs:
             --slot ${{ env.SLOT_NAME }} \
             --target-slot production
 
+      - name: Post-swap health verification
+        id: post_swap_check
+        run: |
+          sleep 15
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" \
+              "https://${{ env.APP_NAME }}.azurewebsites.net/health/ready" || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "healthy=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "healthy=false" >> "$GITHUB_OUTPUT"
+          echo "last_status=$STATUS" >> "$GITHUB_OUTPUT"
+
+      - name: Rollback swap on failed health verification
+        if: steps.post_swap_check.outputs.healthy == 'false'
+        run: |
+          az webapp deployment slot swap \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name ${{ env.APP_NAME }} \
+            --slot ${{ env.SLOT_NAME }} \
+            --target-slot production
+
+      # ── Rollback evidence — written whenever this job's post-swap check
+      # fails, regardless of whether the auto re-swap above succeeds, so
+      # there is always a record of what was observed and what was done.
+      - name: Record rollback evidence
+        if: always() && steps.post_swap_check.outputs.healthy == 'false'
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+          ACTOR: ${{ github.actor }}
+          LAST_STATUS: ${{ steps.post_swap_check.outputs.last_status }}
+        run: |
+          cat > rollback-evidence.json << EOF
+          {
+            "releaseId": "run-${RUN_NUMBER}",
+            "action": "rollback",
+            "triggeredBy": "${ACTOR}",
+            "reason": "post-swap /health/ready returned ${LAST_STATUS} after 5 retries",
+            "resolution": "re-swap executed to restore prior production build",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+          az storage blob upload \
+            --account-name ${{ env.AUDIT_STORAGE }} \
+            --container-name rollback-evidence \
+            --name "${RUN_NUMBER}/rollback-evidence.json" \
+            --file rollback-evidence.json \
+            --auth-mode login \
+            --overwrite
+
+      - name: Fail job if health verification did not recover
+        if: steps.post_swap_check.outputs.healthy == 'false'
+        run: |
+          echo "::error::Production health check failed post-swap; rolled back and recorded evidence. Failing job for visibility."
+          exit 1
+
   # ── 6. Release Evidence + SBOM + Cosign + SLSA ───────────────────────────────
   release-evidence:
     name: Upload Release Evidence + Sign Artifacts
@@ -262,6 +322,15 @@ jobs:
             --bundle release-evidence.json.bundle \
             --yes
 
+          # Verify immediately, in-pipeline, before the bundle is trusted and
+          # archived — a signature that doesn't verify against this workflow's
+          # own OIDC identity fails the job instead of being uploaded as if
+          # it were valid evidence.
+          cosign verify-blob release-evidence.json \
+            --bundle release-evidence.json.bundle \
+            --certificate-identity-regexp "^https://github.com/${{ github.repository }}/" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+
           az storage blob upload \
             --account-name ${{ env.AUDIT_STORAGE }} \
             --container-name release-audit \
@@ -317,6 +386,13 @@ jobs:
           cosign sign-blob sbom.spdx.json \
             --bundle sbom.spdx.json.bundle \
             --yes
+
+          # Verify before archiving — same reasoning as the release evidence
+          # step above: signing alone proves nothing unless something checks it.
+          cosign verify-blob sbom.spdx.json \
+            --bundle sbom.spdx.json.bundle \
+            --certificate-identity-regexp "^https://github.com/${{ github.repository }}/" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
 
           az storage blob upload \
             --account-name ${{ env.AUDIT_STORAGE }} \
@@ -384,6 +460,13 @@ jobs:
             --bundle provenance.json.bundle \
             --yes
 
+          # Verify before archiving — same reasoning as the release evidence
+          # and SBOM steps above.
+          cosign verify-blob provenance.json \
+            --bundle provenance.json.bundle \
+            --certificate-identity-regexp "^https://github.com/${{ github.repository }}/" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+
           az storage blob upload \
             --account-name ${{ env.AUDIT_STORAGE }} \
             --container-name provenance-archive \
@@ -412,8 +495,11 @@ jobs:
             "commit": "${COMMIT_SHA}",
             "sbomGenerated": true,
             "sbomSigned": true,
+            "sbomVerifiedInPipeline": true,
             "provenanceSigned": true,
+            "provenanceVerifiedInPipeline": true,
             "evidenceSigned": true,
+            "evidenceVerifiedInPipeline": true,
             "signingMethod": "cosign-keyless-oidc",
             "rekorTransparencyLog": true,
             "generatedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
