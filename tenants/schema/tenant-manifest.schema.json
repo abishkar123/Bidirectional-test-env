@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bidirectional.internal/schema/tenant-manifest.schema.json",
+  "title": "Tenant Manifest",
+  "type": "object",
+  "required": [
+    "tenantId",
+    "displayName",
+    "azureSubscriptionId",
+    "isolationModel",
+    "regions",
+    "dataResidency",
+    "regulatoryClassification",
+    "owner",
+    "onboardedDate",
+    "retirementPolicy"
+  ],
+  "properties": {
+    "tenantId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,30}$",
+      "description": "Short lowercase identifier, used as the Terraform naming prefix (local.prefix) and backend-config key."
+    },
+    "displayName": { "type": "string" },
+    "azureSubscriptionId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "The tenant's dedicated Azure subscription GUID. One subscription per tenant — see architecture recommendation 1."
+    },
+    "isolationModel": {
+      "type": "string",
+      "enum": ["dedicated-subscription"],
+      "description": "Fixed to dedicated-subscription per the platform's isolation decision; kept as an explicit field rather than an assumption so it is auditable per tenant."
+    },
+    "regions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "dataResidency": {
+      "type": "string",
+      "description": "ISO country/region code data must not leave, e.g. AU."
+    },
+    "keyVaultName": {
+      "type": "string",
+      "description": "Derived as kv-{tenantId}-{environment} if omitted; present here for explicitness in audits."
+    },
+    "auditStorageAccount": {
+      "type": "string",
+      "description": "Derived as st{tenantId}audit if omitted."
+    },
+    "regulatoryClassification": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Applicable regimes, e.g. APRA-CPS234, ASIC-RG271, AUSTRAC, CDR."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Accountable individual or team for this tenant's lifecycle."
+    },
+    "onboardedDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "retirementPolicy": {
+      "type": "string",
+      "description": "Plain-language decommission path, e.g. '90-day soft-decommission, then subscription cancellation'."
+    }
+  },
+  "additionalProperties": false
+}
